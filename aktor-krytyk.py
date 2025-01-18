@@ -203,8 +203,8 @@ def train_step(
 
 #Run the training loop
 
-min_episodes_criterion = 100
-max_episodes = 1000
+min_episodes_criterion = 1000 #1000, 2000, 5000, 10000
+max_episodes = 1000 #1000, 2000, 5000, 10000
 max_steps_per_episode = 500
 
 # `CartPole-v1` is considered solved if average reward is >= 475 over 500
@@ -213,7 +213,7 @@ reward_threshold = 475
 running_reward = 0
 
 # The discount factor for future rewards
-gamma = 0.99
+gamma = 0.5
 
 # Keep the last episodes reward
 episodes_reward: collections.deque = collections.deque(maxlen=min_episodes_criterion)
@@ -241,6 +241,13 @@ for i in t:
 
 print(f'\nSolved at episode {i}: average reward: {running_reward:.2f}!')
 
+
+N=100  #liczba ostanich epizodow
+if len(episodes_reward)>=N:
+    average_reward=np.mean(list(episodes_reward)[-N:])
+    print(f'Dla {N} ostatnich epizodów, średnia nagrody wynosi: {average_reward:.2f}')
+else:
+    print(f'Zbyt mało epizodów aby obliczyć średnia dla ostatnich {N} zadeklarowanych epizodów')
 
 #Wizualizacja
 # Render an episode and save as a GIF file
