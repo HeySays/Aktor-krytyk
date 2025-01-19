@@ -203,20 +203,23 @@ def train_step(
 
 #Run the training loop
 
-min_episodes_criterion = 1000 #1000, 2000, 5000, 10000
-max_episodes = 1000 #1000, 2000, 5000, 10000
+min_episodes_criterion = 2000 #1000, 2000, 5000, 10000
+max_episodes = 2000 #1000, 2000, 5000, 10000
 max_steps_per_episode = 500
 
 # `CartPole-v1` is considered solved if average reward is >= 475 over 500
 # consecutive trials
-reward_threshold = 475
+reward_threshold = 300
 running_reward = 0
 
 # The discount factor for future rewards
-gamma = 0.5
+gamma = 0.99
 
 # Keep the last episodes reward
 episodes_reward: collections.deque = collections.deque(maxlen=min_episodes_criterion)
+
+#Zmienna do śledzenia liczby epizodów potrzebnych do osiągnięcia progu
+episodes_to_threshold = -1 #Domyślna wartość oznaczająca że próg nie został jeszcze osiągnięty
 
 t = tqdm.trange(max_episodes)
 for i in t:
@@ -235,6 +238,11 @@ for i in t:
     # Show the average episode reward every 10 episodes
     if i % 10 == 0:
       pass # print(f'Episode {i}: average reward: {avg_reward}')
+    
+     #Sprawdzanie czy agent osiągnął próg nagrody
+    if running_reward > reward_threshold and episodes_to_threshold == -1:
+      episodes_to_threshold = i + 1 #Zapisanie numeru epizodu przy osiągnięciu progu
+
 
     if running_reward > reward_threshold and i >= min_episodes_criterion:
         break
@@ -242,12 +250,23 @@ for i in t:
 print(f'\nSolved at episode {i}: average reward: {running_reward:.2f}!')
 
 
-N=100  #liczba ostanich epizodow
+
+#Informacja czy próg został osiągnięty 
+if episodes_to_threshold != -1:
+    print(f'\nPróg nagrody {reward_threshold} został osiągnięty w {episodes_to_threshold} epizodach')
+else:
+    print(f'\nPróg nagrody {reward_threshold} nie został osiągnięty dla {max_episodes} epizodów')
+
+
+N=100 #liczba ostanich epizodów
 if len(episodes_reward)>=N:
     average_reward=np.mean(list(episodes_reward)[-N:])
     print(f'Dla {N} ostatnich epizodów, średnia nagrody wynosi: {average_reward:.2f}')
 else:
     print(f'Zbyt mało epizodów aby obliczyć średnia dla ostatnich {N} zadeklarowanych epizodów')
+
+
+
 
 #Wizualizacja
 # Render an episode and save as a GIF file
